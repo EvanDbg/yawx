@@ -17,7 +17,7 @@ var wx = core.NewBucket("wx")
 var api_url = wx.Get("api_url")
 
 func init() {
-	core.Pushs["tg"] = func(i interface{}, s string) {
+	core.Pushs["wx"] = func(i interface{}, s string) {
 		robot_wxid := wx.Get("robot_wxid")
 		if robot_wxid != "" {
 			req := httplib.Post(api_url)
@@ -34,7 +34,7 @@ func init() {
 			req.Response()
 		}
 	}
-	core.GroupPushs["tg"] = func(i, _ interface{}, s string) {
+	core.GroupPushs["wx"] = func(i, _ interface{}, s string) {
 		robot_wxid := wx.Get("robot_wxid")
 		if robot_wxid != "" {
 			req := httplib.Post(api_url)
