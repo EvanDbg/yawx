@@ -28,9 +28,12 @@ func init() {
 				RobotWxid: robot_wxid,
 			}
 			data, _ := json.Marshal(pmsg)
-			req.JSONBody(map[string]string{
+			data, _ = json.Marshal(map[string]string{
 				"data": string(data),
 			})
+
+			req.Header("Content-Type", "json/application")
+			req.Body(data)
 			req.Response()
 		}
 	}
@@ -48,8 +51,8 @@ func init() {
 			data, _ = json.Marshal(map[string]string{
 				"data": string(data),
 			})
-			// core.NotifyMasters(string(data))
-			req.Header("Content-Type", "")
+
+			req.Header("Content-Type", "json/application")
 			req.Body(data)
 			req.Response()
 		}
