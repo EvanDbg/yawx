@@ -192,7 +192,7 @@ func (sender *Sender) Get(index ...int) string {
 }
 
 func (sender *Sender) IsAdmin() bool {
-	return false
+	return strings.Contains(wx.Get("masters"), fmt.Sprint(sender.GetUserID()))
 }
 
 func (sender *Sender) IsMedia() bool {
