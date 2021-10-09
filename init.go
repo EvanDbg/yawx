@@ -214,7 +214,7 @@ func (sender *Sender) Reply(msgs ...interface{}) (int, error) {
 		pmsg := PushMsg{
 			Type:      1,
 			Msg:       url.QueryEscape(msg),
-			FromWxid:  sender.value.Get("from_name"),
+			FromWxid:  sender.value.Get("from_wxid"),
 			RobotWxid: robot_wxid,
 		}
 
