@@ -12,7 +12,7 @@ var wx = core.NewBucket("wx")
 var api_url = wx.Get("api_url")
 
 func init() {
-	core.Server.GET("/yawx", func(c *gin.Context) {
+	core.Server.POST("/yawx", func(c *gin.Context) {
 		data, _ := c.GetRawData()
 		core.NotifyMasters(string(data))
 	})
