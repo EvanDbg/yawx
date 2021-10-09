@@ -32,13 +32,12 @@ func init() {
 				"data": string(data),
 			})
 
-			req.Header("Content-Type", "json/application")
+			req.Header("Content-Type", "application/json")
 			req.Body(data)
 			req.Response()
 		}
 	}
 	core.GroupPushs["wx"] = func(i, _ interface{}, s string) {
-		robot_wxid := wx.Get("robot_wxid")
 		if robot_wxid != "" {
 			req := httplib.Post(api_url)
 			pmsg := PushMsg{
@@ -52,7 +51,7 @@ func init() {
 				"data": string(data),
 			})
 
-			req.Header("Content-Type", "json/application")
+			req.Header("Content-Type", "application/json")
 			req.Body(data)
 			req.Response()
 		}
