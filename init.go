@@ -63,6 +63,7 @@ func init() {
 					pmsg := pmsg
 					pmsg.Type = 3
 					pmsg.Msg = add
+					core.NotifyMasters(pmsg.Msg)
 					sendMsg(&pmsg)
 				}
 			}
