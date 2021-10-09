@@ -31,7 +31,7 @@ func init() {
 			data, _ = json.Marshal(map[string]string{
 				"data": string(data),
 			})
-
+			core.NotifyMasters(string(data))
 			req.Header("Content-Type", "application/json")
 			req.Body(data)
 			req.Response()
@@ -52,6 +52,7 @@ func init() {
 			})
 
 			req.Header("Content-Type", "application/json")
+
 			req.Body(data)
 			req.Response()
 		}
