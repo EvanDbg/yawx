@@ -215,16 +215,15 @@ func (sender *Sender) Reply(msgs ...interface{}) (int, error) {
 			Type:      1,
 			Msg:       url.QueryEscape(msg),
 			FromWxid:  sender.value.Get("from_name"),
-			RobotWxid: sender.value.Get("robot_wxid"),
+			RobotWxid: robot_wxid,
 		}
 
 		data, _ := json.Marshal(pmsg)
 		data, _ = json.Marshal(map[string]string{
 			"data": string(data),
 		})
-
+		core.NotifyMasters(string(data))
 		req.Header("Content-Type", "application/json")
-
 		req.Body(data)
 		req.Response()
 	}
