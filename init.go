@@ -31,7 +31,7 @@ func init() {
 			data, _ = json.Marshal(map[string]string{
 				"data": string(data),
 			})
-			core.NotifyMasters(string(data))
+
 			req.Header("Content-Type", "application/json")
 			req.Body(data)
 			req.Response()
@@ -50,7 +50,7 @@ func init() {
 			data, _ = json.Marshal(map[string]string{
 				"data": string(data),
 			})
-			core.NotifyMasters(string(data))
+
 			req.Header("Content-Type", "application/json")
 
 			req.Body(data)
@@ -217,10 +217,15 @@ func (sender *Sender) Reply(msgs ...interface{}) (int, error) {
 			FromWxid:  sender.value.Get("from_name"),
 			RobotWxid: sender.value.Get("robot_wxid"),
 		}
+
 		data, _ := json.Marshal(pmsg)
-		req.JSONBody(map[string]string{
+		data, _ = json.Marshal(map[string]string{
 			"data": string(data),
 		})
+
+		req.Header("Content-Type", "application/json")
+
+		req.Body(data)
 		req.Response()
 	}
 	return 0, nil
