@@ -1,10 +1,13 @@
 package wx
 
 import (
+	"encoding/json"
+	"fmt"
 	"net/url"
 	"strings"
 	"time"
 
+	"github.com/beego/beego/v2/adapter/httplib"
 	"github.com/cdle/sillyGirl/core"
 	"github.com/gin-gonic/gin"
 )
@@ -14,6 +17,40 @@ var wx = core.NewBucket("wx")
 var api_url = wx.Get("api_url")
 
 func init() {
+	core.Pushs["tg"] = func(i interface{}, s string) {
+		robot_wxid := wx.Get("robot_wxid")
+		if robot_wxid != "" {
+			req := httplib.Post(api_url)
+			pmsg := PushMsg{
+				Type:      1,
+				Msg:       url.QueryEscape(s),
+				FromWxid:  fmt.Sprint(i),
+				RobotWxid: robot_wxid,
+			}
+			data, _ := json.Marshal(pmsg)
+			req.JSONBody(map[string]string{
+				"data": string(data),
+			})
+			req.Response()
+		}
+	}
+	core.GroupPushs["tg"] = func(i, _ interface{}, s string) {
+		robot_wxid := wx.Get("robot_wxid")
+		if robot_wxid != "" {
+			req := httplib.Post(api_url)
+			pmsg := PushMsg{
+				Type:      1,
+				Msg:       url.QueryEscape(s),
+				FromWxid:  fmt.Sprint(i),
+				RobotWxid: robot_wxid,
+			}
+			data, _ := json.Marshal(pmsg)
+			req.JSONBody(map[string]string{
+				"data": string(data),
+			})
+			req.Response()
+		}
+	}
 	core.Server.POST("/yawx", func(c *gin.Context) {
 		data, _ := c.GetRawData()
 		s, err := url.QueryUnescape(string(data))
@@ -27,9 +64,9 @@ func init() {
 		if args.Get("type") == "" {
 			return
 		}
-		// jmsg := &JsonMsg{}
-		// json.Unmarshal([]byte(args.Get("json_msg")), jmsg)
-		// core.NotifyMasters(s)
+		if args.Get("robot_wxid") != wx.Get("robot_wxid") {
+			wx.Set("robot_wxid", args.Get("robot_wxid"))
+		}
 		core.Senders <- &Sender{
 			value: args,
 		}
@@ -156,7 +193,29 @@ func (sender *Sender) IsMedia() bool {
 }
 
 func (sender *Sender) Reply(msgs ...interface{}) (int, error) {
-
+	msg := ""
+	for _, item := range msgs {
+		switch item.(type) {
+		case string:
+			msg = item.(string)
+		case []byte:
+			msg = string(item.([]byte))
+		}
+	}
+	if msg != "" {
+		req := httplib.Post(api_url)
+		pmsg := PushMsg{
+			Type:      1,
+			Msg:       url.QueryEscape(msg),
+			FromWxid:  sender.value.Get("from_name"),
+			RobotWxid: sender.value.Get("robot_wxid"),
+		}
+		data, _ := json.Marshal(pmsg)
+		req.JSONBody(map[string]string{
+			"data": string(data),
+		})
+		req.Response()
+	}
 	return 0, nil
 }
 
