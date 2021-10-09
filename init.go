@@ -28,7 +28,7 @@ func sendMsg(pmsg *PushMsg) {
 	}
 	pmsg.RobotWxid = robot_wxid
 	req := httplib.Post(api_url)
-	pmsg.Msg = url.QueryEscape(pmsg.Msg)
+	// pmsg.Msg = url.QueryEscape(pmsg.Msg)
 	data, _ := json.Marshal(pmsg)
 	data, _ = json.Marshal(map[string]string{
 		"data": string(data),
@@ -68,17 +68,6 @@ func init() {
 			}
 		}
 		s = regexp.MustCompile(`\[CQ:([^\[\]]+)\]`).ReplaceAllString(s, "")
-		// core.NotifyMasters(pmsg.Msg)
-		// {
-		// 	t := []string{}
-		// 	for _, v := range strings.Split(s, "\n") {
-		// 		if v != "" {
-		// 			t = append(t, v)
-		// 		}
-		// 	}
-		// 	s = strings.Join(t, "\n")
-		// }
-		// core.NotifyMasters(pmsg.Msg)
 		s = strings.Replace(s, "\n\n", "\n", -1)
 		s = strings.Trim(s, "\n")
 		pmsg.Msg = s
