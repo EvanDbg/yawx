@@ -30,7 +30,9 @@ func init() {
 		// jmsg := &JsonMsg{}
 		// json.Unmarshal([]byte(args.Get("json_msg")), jmsg)
 		core.NotifyMasters(s)
-		core.Senders <- &Sender{}
+		core.Senders <- &Sender{
+			value: args,
+		}
 	})
 }
 
