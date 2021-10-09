@@ -71,7 +71,7 @@ func init() {
 		s = strings.Replace(s, "\n\n", "\n", -1)
 		s = strings.Trim(s, "\n")
 		pmsg.Msg = s
-		core.NotifyMasters(pmsg.Msg)
+		// core.NotifyMasters(pmsg.Msg)
 		sendMsg(&pmsg)
 	}
 	core.Server.POST("/yawx", func(c *gin.Context) {
