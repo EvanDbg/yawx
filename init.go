@@ -222,7 +222,7 @@ func (sender *Sender) Reply(msgs ...interface{}) (int, error) {
 		data, _ = json.Marshal(map[string]string{
 			"data": string(data),
 		})
-		core.NotifyMasters(string(data))
+		// core.NotifyMasters(string(data))
 		req.Header("Content-Type", "application/json")
 		req.Body(data)
 		req.Response()
