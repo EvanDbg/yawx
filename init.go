@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/url"
+	"os"
+	"regexp"
 	"strings"
 	"time"
 
@@ -17,45 +19,66 @@ var wx = core.NewBucket("wx")
 var api_url = wx.Get("api_url")
 var robot_wxid = wx.Get("robot_wxid")
 
+func sendMsg(pmsg *PushMsg) {
+	if pmsg.Msg == "" {
+		return
+	}
+	if pmsg.Type == 0 {
+		pmsg.Type = 1
+	}
+	pmsg.RobotWxid = robot_wxid
+	req := httplib.Post(api_url)
+	pmsg.Msg = url.QueryEscape(pmsg.Msg)
+	data, _ := json.Marshal(pmsg)
+	data, _ = json.Marshal(map[string]string{
+		"data": string(data),
+	})
+	req.Header("Content-Type", "application/json")
+	req.Body(data)
+	req.Response()
+}
+
 func init() {
 	core.Pushs["wx"] = func(i interface{}, s string) {
 		if robot_wxid != "" {
-			req := httplib.Post(api_url)
 			pmsg := PushMsg{
-				Type:      1,
-				Msg:       url.QueryEscape(s),
-				FromWxid:  fmt.Sprint(i),
-				RobotWxid: robot_wxid,
+				Msg:      s,
+				FromWxid: fmt.Sprint(i),
 			}
-			data, _ := json.Marshal(pmsg)
-			data, _ = json.Marshal(map[string]string{
-				"data": string(data),
-			})
-
-			req.Header("Content-Type", "application/json")
-			req.Body(data)
-			req.Response()
+			sendMsg(&pmsg)
 		}
 	}
 	core.GroupPushs["wx"] = func(i, _ interface{}, s string) {
-		if robot_wxid != "" {
-			req := httplib.Post(api_url)
-			pmsg := PushMsg{
-				Type:      1,
-				Msg:       url.QueryEscape(s),
-				FromWxid:  fmt.Sprint(i) + "@chatroom",
-				RobotWxid: robot_wxid,
-			}
-			data, _ := json.Marshal(pmsg)
-			data, _ = json.Marshal(map[string]string{
-				"data": string(data),
-			})
-
-			req.Header("Content-Type", "application/json")
-
-			req.Body(data)
-			req.Response()
+		pmsg := PushMsg{
+			Type:      1,
+			FromWxid:  fmt.Sprint(i) + "@chatroom",
+			RobotWxid: robot_wxid,
 		}
+		for _, v := range regexp.MustCompile(`\[CQ:image,file=([^\[\]]+)\]`).FindAllStringSubmatch(s, -1) {
+			s = strings.Replace(s, fmt.Sprintf(`[CQ:image,file=%s]`, v[1]), "", -1)
+			data, err := os.ReadFile(core.ExecPath + "/data/images/" + v[1])
+			if err == nil {
+				add := regexp.MustCompile("(https.*)").FindString(string(data))
+				if add != "" {
+					pmsg := pmsg
+					pmsg.Type = 3
+					pmsg.Msg = add
+					sendMsg(&pmsg)
+				}
+			}
+		}
+		s = regexp.MustCompile(`\[CQ:([^\[\]]+)\]`).ReplaceAllString(s, "")
+		{
+			t := []string{}
+			for _, v := range strings.Split(s, "\n") {
+				if v != "" {
+					t = append(t, v)
+				}
+			}
+			s = strings.Join(t, "\n")
+		}
+		pmsg.Msg = s
+		sendMsg(&pmsg)
 	}
 	core.Server.POST("/yawx", func(c *gin.Context) {
 		data, _ := c.GetRawData()
@@ -200,33 +223,22 @@ func (sender *Sender) IsMedia() bool {
 }
 
 func (sender *Sender) Reply(msgs ...interface{}) (int, error) {
-	msg := ""
+	pmsg := PushMsg{
+		FromWxid:  sender.value.Get("from_wxid"),
+		RobotWxid: robot_wxid,
+	}
 	for _, item := range msgs {
 		switch item.(type) {
 		case string:
-			msg = item.(string)
+			pmsg.Msg = item.(string)
 		case []byte:
-			msg = string(item.([]byte))
+			pmsg.Msg = string(item.([]byte))
+		case core.ImageUrl:
+			pmsg.Type = 3
+			pmsg.Msg = string(item.(core.ImageUrl))
 		}
 	}
-	if msg != "" {
-		req := httplib.Post(api_url)
-		pmsg := PushMsg{
-			Type:      1,
-			Msg:       url.QueryEscape(msg),
-			FromWxid:  sender.value.Get("from_wxid"),
-			RobotWxid: robot_wxid,
-		}
-
-		data, _ := json.Marshal(pmsg)
-		data, _ = json.Marshal(map[string]string{
-			"data": string(data),
-		})
-		// core.NotifyMasters(string(data))
-		req.Header("Content-Type", "application/json")
-		req.Body(data)
-		req.Response()
-	}
+	sendMsg(&pmsg)
 	return 0, nil
 }
 
