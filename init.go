@@ -63,21 +63,24 @@ func init() {
 					pmsg := pmsg
 					pmsg.Type = 3
 					pmsg.Msg = add
-					core.NotifyMasters(pmsg.Msg)
 					sendMsg(&pmsg)
 				}
 			}
 		}
 		s = regexp.MustCompile(`\[CQ:([^\[\]]+)\]`).ReplaceAllString(s, "")
-		{
-			t := []string{}
-			for _, v := range strings.Split(s, "\n") {
-				if v != "" {
-					t = append(t, v)
-				}
-			}
-			s = strings.Join(t, "\n")
-		}
+		// core.NotifyMasters(pmsg.Msg)
+		// {
+		// 	t := []string{}
+		// 	for _, v := range strings.Split(s, "\n") {
+		// 		if v != "" {
+		// 			t = append(t, v)
+		// 		}
+		// 	}
+		// 	s = strings.Join(t, "\n")
+		// }
+		// core.NotifyMasters(pmsg.Msg)
+		s = strings.Replace(s, "\n\n", "\n", -1)
+		s = strings.Trim(s, "\n")
 		pmsg.Msg = s
 		sendMsg(&pmsg)
 	}
