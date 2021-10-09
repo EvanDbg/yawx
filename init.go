@@ -1,6 +1,7 @@
 package wx
 
 import (
+	"net/url"
 	"time"
 
 	"github.com/cdle/sillyGirl/core"
@@ -14,7 +15,8 @@ var api_url = wx.Get("api_url")
 func init() {
 	core.Server.POST("/yawx", func(c *gin.Context) {
 		data, _ := c.GetRawData()
-		core.NotifyMasters(string(data))
+		s, _ := url.QueryUnescape(string(data))
+		core.NotifyMasters(s)
 	})
 }
 
