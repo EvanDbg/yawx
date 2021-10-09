@@ -41,14 +41,14 @@ func init() {
 			pmsg := PushMsg{
 				Type:      1,
 				Msg:       url.QueryEscape(s),
-				FromWxid:  fmt.Sprint(i),
+				FromWxid:  fmt.Sprint(i) + "@chatroom",
 				RobotWxid: robot_wxid,
 			}
 			data, _ := json.Marshal(pmsg)
 			data, _ = json.Marshal(map[string]string{
 				"data": string(data),
 			})
-			core.NotifyMasters(string(data))
+			// core.NotifyMasters(string(data))
 			req.Header("Content-Type", "")
 			req.Body(data)
 			req.Response()
