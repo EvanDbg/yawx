@@ -15,10 +15,10 @@ import (
 var wx = core.NewBucket("wx")
 
 var api_url = wx.Get("api_url")
+var robot_wxid = wx.Get("robot_wxid")
 
 func init() {
 	core.Pushs["wx"] = func(i interface{}, s string) {
-		robot_wxid := wx.Get("robot_wxid")
 		if robot_wxid != "" {
 			req := httplib.Post(api_url)
 			pmsg := PushMsg{
@@ -45,9 +45,12 @@ func init() {
 				RobotWxid: robot_wxid,
 			}
 			data, _ := json.Marshal(pmsg)
-			req.JSONBody(map[string]string{
+			data, _ = json.Marshal(map[string]string{
 				"data": string(data),
 			})
+			core.NotifyMasters(string(data))
+			req.Header("Content-Type", "")
+			req.Body(data)
 			req.Response()
 		}
 	}
@@ -64,8 +67,9 @@ func init() {
 		if args.Get("type") == "" {
 			return
 		}
-		if args.Get("robot_wxid") != wx.Get("robot_wxid") {
-			wx.Set("robot_wxid", args.Get("robot_wxid"))
+		if args.Get("robot_wxid") != robot_wxid {
+			robot_wxid = args.Get("robot_wxid")
+			wx.Set("robot_wxid", robot_wxid)
 		}
 		core.Senders <- &Sender{
 			value: args,
