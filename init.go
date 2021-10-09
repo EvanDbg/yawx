@@ -28,7 +28,7 @@ func sendMsg(pmsg *PushMsg) {
 	}
 	pmsg.RobotWxid = robot_wxid
 	req := httplib.Post(api_url)
-	// pmsg.Msg = url.QueryEscape(pmsg.Msg)
+	pmsg.Msg = url.QueryEscape(pmsg.Msg)
 	data, _ := json.Marshal(pmsg)
 	data, _ = json.Marshal(map[string]string{
 		"data": string(data),
